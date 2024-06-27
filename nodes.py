@@ -47,10 +47,12 @@ def FB_blur_fusion_foreground_estimator(image, F, B, alpha, r=90):
 matting_model_dir_name = "matting_models"
 matting_model_list = {
     "vitmatte_small (103 MB)": {
-        "model_url": "hustvl/vitmatte-small-composition-1k"
+        "model_url": "hustvl/vitmatte-small-composition-1k",
+        "cache_dir": "/stable-diffusion-cache/models/vitmatte"
     },
     "vitmatte_base (387 MB)": {
-        "model_url": "hustvl/vitmatte-base-composition-1k"
+        "model_url": "hustvl/vitmatte-base-composition-1k",
+        "cache_dir": "/stable-diffusion-cache/models/vitmatte_base"
     },
 }
 def list_matting_models():
@@ -58,8 +60,11 @@ def list_matting_models():
 
 def load_matting_model(model_name):
     model_url = matting_model_list[model_name]["model_url"]
-    matting_model_checkpoint_path = get_local_filepath_(
-        matting_model_list[model_name]["model_url"], matting_model_dir_name,f"{model_url}")
+    if os.path.exists(matting_model_list[model_name]["cache_dir"]):
+        matting_model_checkpoint_path = matting_model_list[model_name]["cache_dir"]
+    else:
+        matting_model_checkpoint_path = get_local_filepath_(
+            matting_model_list[model_name]["model_url"], matting_model_dir_name,f"{model_url}")
     matting_model = VitMatteForImageMatting.from_pretrained(matting_model_checkpoint_path)
     preprocessor = VitMatteImageProcessor.from_pretrained(matting_model_checkpoint_path)
     matting_model_device = comfy.model_management.get_torch_device()
